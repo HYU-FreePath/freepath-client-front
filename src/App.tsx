@@ -1,6 +1,7 @@
 import { useState, useEffect, SetStateAction, useRef, lazy, Suspense } from 'react'
+import { useParams } from 'react-router-dom'
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
-//import { useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Map, MapMarker } from 'react-kakao-maps-sdk'
 import tw from 'twin.macro'
 import styled from 'styled-components'
@@ -12,8 +13,9 @@ import DetailsPopup from '@/components/DetailsPopup'
 import MapControls from '@/components/MapControls'
 
 import { amenities } from '@/data/amenities'
-//import { buildingAPI } from '@/network/positions'
-import { pos, parking, ramp } from './positions.json'
+//import { pos, parking, ramp } from './positions.json'
+
+import { MapInfoAPI } from '@/network/MapInfoAPI'
 
 const FloorPlan = lazy(() => import('@/components/FloorPlans'))
 
@@ -30,6 +32,18 @@ const HeaderButton = styled.button`
 `
 
 function App() {
+  const { uuid } = useParams<{ uuid?: string }>()
+
+  /** API 호출 */
+  const mapInfo = useQuery({
+    // 쿼리 키는 고유한 식별자로, 쿼리를 구분하는 데 사용.
+    queryKey: ['mapInfo'],
+    // API 호출 함수
+    queryFn: MapInfoAPI(uuid),
+    // 캐시된 데이터가 5분 동안 유효하도록 설정
+    staleTime: 5 * 60 * 1000,
+  })
+
   const mapRef = useRef<kakao.maps.Map>(null)
   const refInput = useRef<HTMLInputElement>(null)
   const [isVisibleId, setIsVisibleId] = useState<number | null>(null) // Popup ID
@@ -44,6 +58,9 @@ function App() {
   const [targetAlertName, setTargetAlertName] = useState('info') // Alert 창 종류
   const [hasFocused, setHasFocused] = useState(false) // 최초 포커스 여부 관리
 
+  const [centerLat, setCenterLat] = useState(37.29781) // 지도 중심 위도
+  const [centerLng, setCenterLng] = useState(126.835358) // 지도 중심 경도
+
   // 지도 확대 레벨을 저장할 state
   const [mapLevel, setMapLevel] = useState(
     (navigator.userAgent.indexOf('iPhone') 
@@ -52,11 +69,12 @@ function App() {
   )
 
   // 현재 위치를 저장할 state
-  const [state, setState] = useState({
-    center: {
-      lat: 37.29781,
-      lng: 126.835358,
-    },
+  const [state, setState] = useState<{
+    center: { lat: number; lng: number };
+    errMsg: string | null;
+    isLoading: boolean;
+  }>({
+    center: { lat: centerLat, lng: centerLng }, // 기본값
     errMsg: null,
     isLoading: true,
   })
@@ -64,8 +82,8 @@ function App() {
   // 지도의 중심을 저장할 state
   const [mapState, setMapState] = useState({
     center: {
-      lat: 37.29781,
-      lng: 126.835358,
+      lat: centerLat, //37.29781,
+      lng: centerLng //126.835358,
     },
     isPanto: false,
   })
@@ -81,18 +99,10 @@ function App() {
     }
   }
 
-  /** API 호출
-  const positions = useQuery({
-    queryKey: ['building'],
-    queryFn: buildingAPI,
-    staleTime: 5 * 60 * 1000,
-  })
+  const pos = mapInfo.data?.data.pos ?? []
+  const ramp = mapInfo.data?.data.ramp ?? []
+  const parking = mapInfo.data?.data.parking ?? []
 
-  const pos = positions.data?.pos ?? []
-  const ramp = positions.data?.ramp ?? []
-  const parking = positions.data?.parking ?? []
-  */
-  
   const toggleSearch = () => {
     setSearchVisible(!isSearchVisible)
   }
@@ -112,11 +122,13 @@ function App() {
   }
   
   const openReportPage = () => {
+    handleAlertOpen('report')
+    /**
     window.open(
       'https://naver.me/xbAgSdy4',
       '_black',
       'noopener noreferrer',
-    )
+    )*/
   }
 
   const zoomIn = () => {
@@ -136,7 +148,7 @@ function App() {
       // 두 번 클릭 시 중심을 캠퍼스로 이동 (현재 위치 == 지도 중심 같을 때)
       setMapState((prev) => ({
         ...prev,
-        center: { lat: 37.29781, lng: 126.835358 },
+        center: { lat: centerLat, lng: centerLng },
         isPanto: true,
       }))
     } else {
@@ -234,6 +246,28 @@ function App() {
       kakao.maps.Tileset.add('ROADMAP', tileset)
     })
   }, [])
+
+  // **6. mapInfo 데이터가 도착하면 state 업데이트**
+  useEffect(() => {
+    if (mapInfo.data) {
+      const meta = mapInfo.data.data.meta
+      const latNum = parseFloat(meta.lat)
+      const lngNum = parseFloat(meta.lng)
+      setCenterLat(latNum)
+      setCenterLng(lngNum)
+      /** 
+      setState(prev => ({
+        ...prev,
+        center: { lat: centerLat, lng: centerLng },
+        isLoading: false,
+      }));*/
+      setMapState(prev => ({
+        ...prev,
+        center: { lat: centerLat, lng: centerLng },
+        isPanto: false,
+      }));
+    }
+  }, [centerLat, centerLng, mapInfo.data])
 
   useEffect(() => {
     // 스크린 리더가 카카오 로고 및 스케일 요소 읽지 않도록 설정
@@ -389,7 +423,7 @@ function App() {
                     aria-label='길편하냥 타이틀 텍스트'
                     className="text-lg font-fBold tracking-tight"
                   >
-                    길편하냥
+                    {mapInfo.data?.data.meta.title || '이름 없음'}
                   </h1>
               </div>
               <div className='flex right-0 items-center'>
@@ -479,6 +513,7 @@ function App() {
                     setShowResults={setShowResults}
                   />
                 )}
+                
               </header>
               
               {/* 지도 */}
@@ -534,13 +569,13 @@ function App() {
                     (selectedCategory === "wheel" && value.wheel) ||
                     (selectedCategory === "elevator" && value.elevator) ||
                     (selectedCategory === "toilet" && value.toilet)
-                    
+
                     return (
                       showMarker && (
                         <EventMarkerContainer
                           key={`EventMarkerContainer-${value.lat}-${value.lng}`}
                           id={value.id}
-                          position={{ lat: value.lat, lng: value.lng }}
+                          position={{ lat: parseFloat(value.lat), lng: parseFloat(value.lng) }}
                           content={value.title}
                           amenityData={{
                             wheel: value.wheel,
@@ -566,7 +601,7 @@ function App() {
                               src: "/images/rampMarker.png",
                               size: { width: rampSize, height: rampSize },
                             }}
-                            position={{ lat: value.lat, lng: value.lng }}
+                            position={{ lat: parseFloat(value.lat), lng: parseFloat(value.lng) }}
                             zIndex={-2}
                           />
                         )
@@ -584,7 +619,7 @@ function App() {
                               src: "/images/parkingMarker.png",
                               size: { width: parkingSize, height: parkingSize },
                             }}
-                            position={{ lat: value.lat, lng: value.lng }}
+                            position={{ lat: parseFloat(value.lat), lng: parseFloat(value.lng) }}
                             zIndex={-1}
                           />
                         )
