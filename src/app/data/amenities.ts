@@ -1,6 +1,8 @@
+import { floors } from '@/data/floors'
+
 export type amenities = {
     id: number
-    tilte: string
+    title: string
     lat: string
     lng: string
     wheel: boolean

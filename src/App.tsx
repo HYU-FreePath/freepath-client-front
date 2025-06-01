@@ -1,6 +1,6 @@
-import { useState, useEffect, SetStateAction, useRef, lazy, Suspense } from 'react'
+import { useState, useEffect, useLayoutEffect, SetStateAction, useRef } from 'react'
 import { useParams } from 'react-router-dom'
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Map, MapMarker } from 'react-kakao-maps-sdk'
 import tw from 'twin.macro'
@@ -13,11 +13,11 @@ import DetailsPopup from '@/components/DetailsPopup'
 import MapControls from '@/components/MapControls'
 
 import { amenities } from '@/data/amenities'
+import { specials } from '@/data/specials'
 //import { pos, parking, ramp } from './positions.json'
 
 import { MapInfoAPI } from '@/network/MapInfoAPI'
-
-const FloorPlan = lazy(() => import('@/components/FloorPlans'))
+import { MapInfo } from '@/data/MapInfo'
 
 const CItemWrapper = styled.div`
   ${tw`flex justify-center items-center`}
@@ -35,11 +35,11 @@ function App() {
   const { uuid } = useParams<{ uuid?: string }>()
 
   /** API 호출 */
-  const mapInfo = useQuery({
+  const mapInfo = useQuery<MapInfo, Error>({
     // 쿼리 키는 고유한 식별자로, 쿼리를 구분하는 데 사용.
-    queryKey: ['mapInfo'],
+    queryKey: ['mapInfo', uuid],
     // API 호출 함수
-    queryFn: MapInfoAPI(uuid),
+    queryFn: () => MapInfoAPI(uuid || ''),
     // 캐시된 데이터가 5분 동안 유효하도록 설정
     staleTime: 5 * 60 * 1000,
   })
@@ -99,9 +99,9 @@ function App() {
     }
   }
 
-  const pos = mapInfo.data?.data.pos ?? []
-  const ramp = mapInfo.data?.data.ramp ?? []
-  const parking = mapInfo.data?.data.parking ?? []
+  const pos: amenities[] = mapInfo.data?.data.pos ?? []
+  const ramp: specials[] = mapInfo.data?.data.ramp ?? []
+  const parking: specials[] = mapInfo.data?.data.parking ?? []
 
   const toggleSearch = () => {
     setSearchVisible(!isSearchVisible)
@@ -248,9 +248,9 @@ function App() {
   }, [])
 
   // **6. mapInfo 데이터가 도착하면 state 업데이트**
-  useEffect(() => {
-    if (mapInfo.data) {
-      const meta = mapInfo.data.data.meta
+  useLayoutEffect(() => {
+    if (mapInfo?.data) {
+      const meta = mapInfo.data?.data.meta
       const latNum = parseFloat(meta.lat)
       const lngNum = parseFloat(meta.lng)
       setCenterLat(latNum)
@@ -404,252 +404,242 @@ function App() {
 
   return (
     <>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={
-            <>
-            {/* 헤더 */}
-            <header className="fixed flex justify-between items-center top-0 left-0 w-full bg-white shadow-lg h-12 px-4 z-50 select-none touch-none">
-              <div 
-                className='pl-[0.2rem] flex items-center cursor-pointer'
-                onClick={() => window.location.reload()}
-              >
-                  <img 
-                    className='w-5 mr-2' 
-                    src='/images/logo.png' 
-                    alt='길편하냥 로고'
-                  />
-                  <h1
-                    aria-label='길편하냥 타이틀 텍스트'
-                    className="text-lg font-fBold tracking-tight"
-                  >
-                    {mapInfo.data?.data.meta.title || '이름 없음'}
-                  </h1>
-              </div>
-              <div className='flex right-0 items-center'>
-                <HeaderButton 
-                  id='install-about'
-                  className='pwa:invisible'
-                  onClick={() => handleAlertOpen('pwa')}
-                >
-                    <img 
-                      src='/images/download-square.svg'
-                      className='fill-black'
-                      alt='앱 설치 안내' 
-                    />
-                </HeaderButton>
-                <HeaderButton 
-                  onClick={() => handleAlertOpen('info')}
-                >
-                    <img 
-                      src='/images/info.svg'
-                      alt='사이트 정보' 
-                    />
-                </HeaderButton>
-                <HeaderButton 
-                  onClick={toggleSearch}
-                >
-                    <img 
-                      src='/images/search.svg'
-                      alt={!isSearchVisible ? '검색창 열기' : '검색창 닫기'} 
-                    />
-                </HeaderButton>
-              </div>
-    
-              {isSearchVisible && (
-                <div className="absolute top-12 left-0 w-full bg-white p-4 shadow-md z-50 font-fMedium">
-                  <h2 className="flex text-md mb-2 font-fBold">장소 검색</h2>
-                    <div className='h-12 flex justify-center items-center gap-2'>
-                      <input
-                        ref={refInput}
-                        type="text"
-                        placeholder="장소를 검색하세요."
-                        className="w-full h-11 border border-[#002060] rounded-md p-2 pointer-events-auto touch-auto"
-                        value={inputValue}
-                        onChange={handleChange}
-                        onKeyDown={(e) => { if (e.key === 'Enter') setShowResults(true) }}
-                      />
-                      <CItemWrapper>
-                        <button
-                          onClick={() => handleAlertOpen('mic')}
-                          className='h-11 w-11 bg-white border border-[#002060] rounded-md p-2'
-                        > 
-                          <img
-                            src='/images/mic.png'
-                            alt='음성 인식하여 검색어 입력하기'
-                          />
-                        </button>
-                      </CItemWrapper>
-      
-                      <CItemWrapper>
-                        <button 
-                          className='h-11 w-11 bg-white border border-[#002060] rounded-md p-2'
-                          onClick={() => setShowResults(true)}
-                        >
-                          <img
-                            src='/images/search2.png'
-                            alt='검색'
-                          />
-                        </button>
-                      </CItemWrapper>
-                    </div>
-                    {showResults && 
-                      <Searching
-                        value={inputValue}
-                        plusLat={plusLat}
-                        setIsVisibleId={setIsVisibleId}
-                        setSearchVisible={setSearchVisible}
-                        setInputValue={setInputValue}
-                        setMapState={setMapState}
-                      />
-                    }
-                  </div>
-                )}
-                {showAlert && (
-                  <InfoAlert
-                    onClose={handleAlertClose}
-                    targetName={targetAlertName}
-                    setInputValue={setInputValue}
-                    setShowResults={setShowResults}
-                  />
-                )}
-                
-              </header>
-              
-              {/* 지도 */}
-              <div id='mapwrap' className='w-full h-screen-vh font-fMedium tracking-tight select-none touch-none'>
-                {/* 지도 위에 표시될 마커 카테고리 */}
-                <CategoryTab 
-                  selectedCategory={selectedCategory}
-                  setSelectedCategory={setSelectedCategory}
-                  onclick={openReportPage}
+      {/* 헤더 */}
+      <header className="fixed flex justify-between items-center top-0 left-0 w-full bg-white shadow-lg h-12 px-4 z-50 select-none touch-none">
+        <div 
+          className='pl-[0.2rem] flex items-center cursor-pointer'
+          onClick={() => window.location.reload()}
+        >
+            <img 
+              className='w-5 mr-2' 
+              src='/images/logo.png' 
+              alt='길편하냥 로고'
+            />
+            <h1
+              aria-label='길편하냥 타이틀 텍스트'
+              className="text-lg font-fBold tracking-tight"
+            >
+              {mapInfo.data?.data.meta.title || '이름 없음'}
+            </h1>
+        </div>
+        <div className='flex right-0 items-center'>
+          <HeaderButton 
+            id='install-about'
+            className='pwa:invisible'
+            onClick={() => handleAlertOpen('pwa')}
+          >
+              <img 
+                src='/images/download-square.svg'
+                className='fill-black'
+                alt='앱 설치 안내' 
+              />
+          </HeaderButton>
+          <HeaderButton 
+            onClick={() => handleAlertOpen('info')}
+          >
+              <img 
+                src='/images/info.svg'
+                alt='사이트 정보' 
+              />
+          </HeaderButton>
+          <HeaderButton 
+            onClick={toggleSearch}
+          >
+              <img 
+                src='/images/search.svg'
+                alt={!isSearchVisible ? '검색창 열기' : '검색창 닫기'} 
+              />
+          </HeaderButton>
+        </div>
+
+        {isSearchVisible && (
+          <div className="absolute top-12 left-0 w-full bg-white p-4 shadow-md z-50 font-fMedium">
+            <h2 className="flex text-md mb-2 font-fBold">장소 검색</h2>
+              <div className='h-12 flex justify-center items-center gap-2'>
+                <input
+                  ref={refInput}
+                  type="text"
+                  placeholder="장소를 검색하세요."
+                  className="w-full h-11 border border-[#002060] rounded-md p-2 pointer-events-auto touch-auto"
+                  value={inputValue}
+                  onChange={handleChange}
+                  onKeyDown={(e) => { if (e.key === 'Enter') setShowResults(true) }}
                 />
-                { /* 지도 확대, 축소 컨트롤 div 입니다 */ }
-                <MapControls 
-                  zoomIn={zoomIn} 
-                  zoomOut={zoomOut} 
-                />
-                { /** 현재 위치로 이동 버튼 */ }
-                <div className='absolute bottom-[45px] right-3 rounded-md border border-gray-400 overflow-hidden z-[2]'>
-                  <button className='p-2 bg-white flex items-center justify-center'>
-                    <img 
-                      src='/images/location.png'
-                      alt='현재 위치로 이동'
-                      className='w-6' 
-                      onClick={() => accessCurrentLocation()} />
+                <CItemWrapper>
+                  <button
+                    onClick={() => handleAlertOpen('mic')}
+                    className='h-11 w-11 bg-white border border-[#002060] rounded-md p-2'
+                  > 
+                    <img
+                      src='/images/mic.png'
+                      alt='음성 인식하여 검색어 입력하기'
+                    />
                   </button>
-                </div>
-                <Map
-                  id='map'
-                  ref={mapRef}
-                  center={mapState.center} // 지도의 중심 좌표
-                  isPanto={mapState.isPanto} // 지도의 중심 좌표를 변경할 때 애니메이션 효과를 줄지 여부
-                  style={{'width': '100%', 'height': '100vh'}} // 지도 크기
-                  level={mapLevel}  // 지도 확대 레벨
-                  minLevel={5}  // 지도 최소 레벨
-                  maxLevel={2}  // 지도 최대 레벨
-                  onDragEnd={(map) => {
-                    const latlng = map.getCenter()
-                    setMapState((prev) => ({
-                      ...prev,
-                      center: { lat: latlng.getLat(), lng: latlng.getLng() },
-                      isPanto: false,
-                    }))
-                  }}
-                  onZoomChanged={(map) => {
-                    const level = map.getLevel()
-                    setMapLevel(level)
-                  }}
-                  onCreate={map => map.addOverlayMapTypeId(kakao.maps.MapTypeId['ROADMAP'])}
-                >
-                  {/* 지도 위에 표시될 마커 */}
-                  {pos.map((value) => {
-                    const showMarker =
-                    selectedCategory === "entire" ||
-                    (selectedCategory === "wheel" && value.wheel) ||
-                    (selectedCategory === "elevator" && value.elevator) ||
-                    (selectedCategory === "toilet" && value.toilet)
+                </CItemWrapper>
 
-                    return (
-                      showMarker && (
-                        <EventMarkerContainer
-                          key={`EventMarkerContainer-${value.lat}-${value.lng}`}
-                          id={value.id}
-                          position={{ lat: parseFloat(value.lat), lng: parseFloat(value.lng) }}
-                          content={value.title}
-                          amenityData={{
-                            wheel: value.wheel,
-                            elevator: value.elevator,
-                            toilet: value.toilet,
-                            dots: value.dots,
-                            floorplan: value.floorplan,
-                            floors: value.floors || [],
-                            caution: value.caution
-                          }}
-                        />
-                      )
-                    )
-                  })}
+                <CItemWrapper>
+                  <button 
+                    className='h-11 w-11 bg-white border border-[#002060] rounded-md p-2'
+                    onClick={() => setShowResults(true)}
+                  >
+                    <img
+                      src='/images/search2.png'
+                      alt='검색'
+                    />
+                  </button>
+                </CItemWrapper>
+              </div>
+              {showResults && 
+                <Searching
+                  value={inputValue}
+                  plusLat={plusLat}
+                  setIsVisibleId={setIsVisibleId}
+                  setSearchVisible={setSearchVisible}
+                  setInputValue={setInputValue}
+                  setMapState={setMapState}
+                />
+              }
+            </div>
+          )}
+          {showAlert && (
+            <InfoAlert
+              onClose={handleAlertClose}
+              targetName={targetAlertName}
+              setInputValue={setInputValue}
+              setShowResults={setShowResults}
+            />
+          )}
+          
+        </header>
+        
+        {/* 지도 */}
+        <div id='mapwrap' className='w-full h-screen-vh font-fMedium tracking-tight select-none touch-none'>
+          {/* 지도 위에 표시될 마커 카테고리 */}
+          <CategoryTab 
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            onclick={openReportPage}
+          />
+          { /* 지도 확대, 축소 컨트롤 div 입니다 */ }
+          <MapControls 
+            zoomIn={zoomIn} 
+            zoomOut={zoomOut} 
+          />
+          { /** 현재 위치로 이동 버튼 */ }
+          <div className='absolute bottom-[45px] right-3 rounded-md border border-gray-400 overflow-hidden z-[2]'>
+            <button className='p-2 bg-white flex items-center justify-center'>
+              <img 
+                src='/images/location.png'
+                alt='현재 위치로 이동'
+                className='w-6' 
+                onClick={() => accessCurrentLocation()} />
+            </button>
+          </div>
+          <Map
+            id='map'
+            ref={mapRef}
+            center={mapState.center} // 지도의 중심 좌표
+            isPanto={mapState.isPanto} // 지도의 중심 좌표를 변경할 때 애니메이션 효과를 줄지 여부
+            style={{'width': '100%', 'height': '100vh'}} // 지도 크기
+            level={mapLevel}  // 지도 확대 레벨
+            minLevel={5}  // 지도 최소 레벨
+            maxLevel={2}  // 지도 최대 레벨
+            onDragEnd={(map) => {
+              const latlng = map.getCenter()
+              setMapState((prev) => ({
+                ...prev,
+                center: { lat: latlng.getLat(), lng: latlng.getLng() },
+                isPanto: false,
+              }))
+            }}
+            onZoomChanged={(map) => {
+              const level = map.getLevel()
+              setMapLevel(level)
+            }}
+            onCreate={map => map.addOverlayMapTypeId(kakao.maps.MapTypeId['ROADMAP'])}
+          >
+            {/* 지도 위에 표시될 마커 */}
+            {pos.map((value) => {
+              const showMarker =
+              selectedCategory === "entire" ||
+              (selectedCategory === "wheel" && value.wheel) ||
+              (selectedCategory === "elevator" && value.elevator) ||
+              (selectedCategory === "toilet" && value.toilet)
 
-                  { /** 경사로 마커 */
-                    ramp.map((value) => {
-                      const showMarker = (selectedCategory === "entire" || selectedCategory === "ramp")
-                      return (
-                        showMarker && (
-                          <MapMarker
-                            image={{
-                              src: "/images/rampMarker.png",
-                              size: { width: rampSize, height: rampSize },
-                            }}
-                            position={{ lat: parseFloat(value.lat), lng: parseFloat(value.lng) }}
-                            zIndex={-2}
-                          />
-                        )
-                      )
-                    }
-                  )}
+              return (
+                showMarker && (
+                  <EventMarkerContainer
+                    key={`EventMarkerContainer-${value.lat}-${value.lng}`}
+                    id={value.id}
+                    position={{ lat: parseFloat(value.lat), lng: parseFloat(value.lng) }}
+                    content={value.title}
+                    amenityData={{
+                      id: value.id,
+                      title: value.title,
+                      lat: value.lat,
+                      lng: value.lng,
+                      wheel: value.wheel,
+                      elevator: value.elevator,
+                      toilet: value.toilet,
+                      dots: value.dots,
+                      floorplan: value.floorplan,
+                      floors: value.floors || [],
+                      caution: value.caution
+                    }}
+                  />
+                )
+              )
+            })}
 
-                  { /** 장애인 주차장 마커 */
-                    parking.map((value) => {
-                      const showMarker = (selectedCategory === "entire" || selectedCategory === "parking")
-                      return (
-                        showMarker && (
-                          <MapMarker
-                            image={{
-                              src: "/images/parkingMarker.png",
-                              size: { width: parkingSize, height: parkingSize },
-                            }}
-                            position={{ lat: parseFloat(value.lat), lng: parseFloat(value.lng) }}
-                            zIndex={-1}
-                          />
-                        )
-                      )
-                    }
-                  )}
-                  
-                  {/* 현재 위치 표시 마커 */}
-                  {!state.isLoading && (
+            { /** 경사로 마커 */
+              ramp.map((value) => {
+                const showMarker = (selectedCategory === "entire" || selectedCategory === "ramp")
+                return (
+                  showMarker && (
                     <MapMarker
                       image={{
-                        src: "https://t1.daumcdn.net/localimg/localimages/07/2018/mw/m640/ico_marker.png",
-                        size: { width: 30, height: 30 },
+                        src: "/images/rampMarker.png",
+                        size: { width: rampSize, height: rampSize },
                       }}
-                      position={state.center}
+                      position={{ lat: parseFloat(value.lat), lng: parseFloat(value.lng) }}
+                      zIndex={-2}
+                    />
+                  )
+                )
+              }
+            )}
+
+            { /** 장애인 주차장 마커 */
+              parking.map((value) => {
+                const showMarker = (selectedCategory === "entire" || selectedCategory === "parking")
+                return (
+                  showMarker && (
+                    <MapMarker
+                      image={{
+                        src: "/images/parkingMarker.png",
+                        size: { width: parkingSize, height: parkingSize },
+                      }}
+                      position={{ lat: parseFloat(value.lat), lng: parseFloat(value.lng) }}
                       zIndex={-1}
                     />
-                  )}
-                </Map>
-              </div>
-            </>
-          } />
-          <Route path="/floorplan/:id" element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <FloorPlan />
-              </Suspense>
-            } 
-          />
-        </Routes>
-      </BrowserRouter>
+                  )
+                )
+              }
+            )}
+            
+            {/* 현재 위치 표시 마커 */}
+            {!state.isLoading && (
+              <MapMarker
+                image={{
+                  src: "https://t1.daumcdn.net/localimg/localimages/07/2018/mw/m640/ico_marker.png",
+                  size: { width: 30, height: 30 },
+                }}
+                position={state.center}
+                zIndex={-1}
+              />
+            )}
+          </Map>
+        </div>
     </>
   )
 }

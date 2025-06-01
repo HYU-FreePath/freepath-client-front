@@ -1,7 +1,7 @@
 import { MapInfo } from '@/data/MapInfo'
 import { apiClient } from '@/network/apiClient'
 
-export const apiHandler = async <T extends | Array<MapInfo> | Blob>(
+export const apiHandler = async <T extends | MapInfo | Blob>(
     urlPath: string,
     responseType: 'json' | 'blob' = 'json' // 기본값을 json으로 설정
 ): Promise<T> => {

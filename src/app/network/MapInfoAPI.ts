@@ -1,6 +1,6 @@
-import { MapInfo } from '@/data'
+import { MapInfo } from '@/data/MapInfo'
 import { apiHandler } from '@/network/apiHandler'
 
-export const MapInfoAPI = async (uuid: string): Promise<Array<MapInfo>> => {
-  return apiHandler<Array<MapInfo>>(`/data/${uuid}`)
+export const MapInfoAPI = async (uuid: string): Promise<MapInfo> => {
+  return apiHandler<MapInfo>(`/data/${uuid}`)
 }
