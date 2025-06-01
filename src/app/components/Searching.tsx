@@ -1,7 +1,9 @@
 import { Dispatch, SetStateAction } from 'react'
-import { pos } from '../../positions.json'
+import MapInfo from '@/data/MapInfo'
+//import { pos } from '../../positions.json'
 
 interface SearchingProps {
+    pos: MapInfo['data']['pos'] | undefined
     value: string
     setIsVisibleId: Dispatch<SetStateAction<number | null>>
     setSearchVisible: Dispatch<SetStateAction<boolean>>
@@ -11,8 +13,8 @@ interface SearchingProps {
 }
 
 const Searching: React.FC<SearchingProps> = (
-    { value, setIsVisibleId, setSearchVisible, setInputValue, setMapState, plusLat }) => {
-    
+    { pos, value, setIsVisibleId, setSearchVisible, setInputValue, setMapState, plusLat }) => {
+
     const resultHandle = (id : number, lat : number, lng : number) => { 
         setInputValue('')
         setSearchVisible(false)
@@ -26,7 +28,7 @@ const Searching: React.FC<SearchingProps> = (
             setIsVisibleId(id)
         }, 1)
     }
-    
+
     return (
         <>
             {value &&
@@ -37,25 +39,7 @@ const Searching: React.FC<SearchingProps> = (
                         // 검색 결과가 1개일 때 자동으로 선택
                         if (filteredPos.length === 1) {
                             const {id, lat, lng} = filteredPos[0]
-                            resultHandle(id, lat, lng)
-                        } else if (value === '소프트웨어융합대학' || value === '소융대') {
-                            // 이스터 에그
-                            return (
-                                <>
-                                    <li className='p-2'>
-                                        소융대 건물 지어주세요 ㅠㅠ
-                                    </li>
-                                </>
-                            )
-                        } else if (value === '인권센터') {
-                            // 이스터 에그
-                            return (
-                                <>
-                                    <li className='p-2'>
-                                        학생회관 1층으로 오세요!<br/>언제나 환영합니다☺️
-                                    </li>
-                                </>
-                            )
+                            resultHandle(id, parseFloat(lat), parseFloat(lng))
                         } else if (filteredPos.length === 0) {
                             return (
                                 <>

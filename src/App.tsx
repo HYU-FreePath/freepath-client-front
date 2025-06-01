@@ -378,7 +378,7 @@ function App() {
             <div className='flex justify-center text-[0.8rem] px-5 pb-5 pt-1'>
               <Link
                 className='w-full mr-3'
-                to={!amenityData.floorplan ? '#' : `/floorplan/${id}`}
+                to={!amenityData.floorplan ? '#' : `./floorplan/${id}`}
                 state={{
                   title: content,
                   floors: amenityData.floors
@@ -419,7 +419,7 @@ function App() {
               aria-label='길편하냥 타이틀 텍스트'
               className="text-lg font-fBold tracking-tight"
             >
-              {mapInfo.data?.data.meta.title || '이름 없음'}
+              {mapInfo.data?.data.meta.title || ''}
             </h1>
         </div>
         <div className='flex right-0 items-center'>
@@ -491,6 +491,7 @@ function App() {
               </div>
               {showResults && 
                 <Searching
+                  pos={pos}
                   value={inputValue}
                   plusLat={plusLat}
                   setIsVisibleId={setIsVisibleId}
