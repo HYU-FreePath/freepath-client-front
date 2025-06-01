@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction } from 'react'
-import MapInfo from '@/data/MapInfo'
+import { amenities } from '@/data/amenities'
 //import { pos } from '../../positions.json'
 
 interface SearchingProps {
-    pos: MapInfo['data']['pos'] | undefined
+    pos: Array<amenities> | undefined
     value: string
     setIsVisibleId: Dispatch<SetStateAction<number | null>>
     setSearchVisible: Dispatch<SetStateAction<boolean>>
@@ -34,7 +34,7 @@ const Searching: React.FC<SearchingProps> = (
             {value &&
                 <ul id='searchedList' className='w-full mt-3'>
                     {pos && (() => {
-                        const filteredPos = pos.filter(({title}) => title.includes(value))
+                        const filteredPos = pos.filter((item: amenities) => item.title.includes(value))
 
                         // 검색 결과가 1개일 때 자동으로 선택
                         if (filteredPos.length === 1) {
@@ -50,14 +50,14 @@ const Searching: React.FC<SearchingProps> = (
                             )
                         }
 
-                        return filteredPos.map(({id, title, lat, lng}) => (
+                        return filteredPos.map((data : amenities) => (
                             <li
-                                key={id}
+                                key={data.id}
                                 className='border-b border-gray-300 cursor-pointer hover:bg-gray-200'
-                                onClick={() => resultHandle(id, lat, lng)}
+                                onClick={() => resultHandle(data.id, parseFloat(data.lat), parseFloat(data.lng))}
                             >
                                 <div className='p-2'>
-                                    {title}
+                                    {data.title}
                                 </div>
                             </li>
                         ))
