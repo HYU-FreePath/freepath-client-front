@@ -22,11 +22,18 @@
 
     "types": ["vite-plugin-pwa/react", "kakao.maps.d.ts"],
 
-    "baseUrl": ".",
+    //"baseUrl": ".",
+    /**
     "paths": {
       "@/*": ["./src/app/*"],
+    },*/
+    "baseUrl": "./src/app",
+    "paths": {
+      "@/components/*": ["components/*"],
+      "@/network/*": ["network/*"],
+      "@/data/*": ["data/*"]
     }
   },
-  "include": ["./src"],
+  "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
