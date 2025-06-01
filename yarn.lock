@@ -4482,7 +4482,7 @@ __metadata:
     vite-plugin-babel-macros: "npm:^1.0.6"
     vite-plugin-mkcert: "npm:^1.17.6"
     vite-plugin-pwa: "npm:^0.20.5"
-    vite-tsconfig-paths: "npm:^5.0.1"
+    vite-tsconfig-paths: "npm:^5.1.4"
     workbox-cli: "npm:^7.1.0"
   languageName: unknown
   linkType: soft
@@ -7795,7 +7795,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-tsconfig-paths@npm:^5.0.1":
+"vite-tsconfig-paths@npm:^5.1.4":
   version: 5.1.4
   resolution: "vite-tsconfig-paths@npm:5.1.4"
   dependencies:
