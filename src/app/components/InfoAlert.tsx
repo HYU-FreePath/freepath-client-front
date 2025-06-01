@@ -28,6 +28,11 @@ const InfoAlert: React.FC<InfoAlertProps> = ({ targetName, onClose, setInputValu
     toggleListening()
   }
 
+  const handleSendButton = () => {
+    alert('불편한 점이 접수되었습니다.')
+    onClose()
+  }
+
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 font-fMedium tracking-tight"
@@ -35,10 +40,10 @@ const InfoAlert: React.FC<InfoAlertProps> = ({ targetName, onClose, setInputValu
       <div className="bg-white p-5 rounded-md shadow-lg w-80 text-sm">
         <div className='flex justify-between items-center mb-3'>
           <h2 className="text-lg font-fBold tracking-tighter">
-            {
-              targetName === 'info' ? 
-                '정보' : (targetName === 'pwa' ? '앱 설치 안내' : '음성 인식')
-            }
+            {targetName === 'info' && '정보'}
+            {targetName === 'pwa' && '앱 설치 안내'}
+            {targetName === 'mic' && '음성 인식'}
+            {targetName === 'report' && '불편 신고'}
           </h2>
           { // 음성 인식 닫기 버튼
             targetName === 'mic' && (
@@ -141,10 +146,37 @@ const InfoAlert: React.FC<InfoAlertProps> = ({ targetName, onClose, setInputValu
         }
 
         {
+          targetName === 'report' && (
+            <>
+              <p className='mb-1'>
+                불편한 점에 대해 적어주세요
+              </p>
+              <p className='text-xs text-gray-500 mb-4'>
+                (예시: '길이 너무 좁아요', '정보가 잘못되었어요.')
+              </p>
+              <textarea
+                className='w-full h-20 p-2 border border-gray-300 rounded-md'
+                placeholder='불편한 점을 적어주세요...'
+              ></textarea>
+            </>
+          )
+        }
+
+        {
           targetName !== 'mic' ? (
             // 기본 닫기 버튼
             <>
               <div className="mt-4 flex justify-end">
+                {
+                  targetName === 'report' ? (
+                    <button 
+                      className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
+                      onClick={handleSendButton}
+                    >
+                      보내기
+                    </button>
+                  ) : null
+                }
                 <button 
                   className="bg-blue-500 text-white px-4 py-2 rounded-md"
                   onClick={onClose}
