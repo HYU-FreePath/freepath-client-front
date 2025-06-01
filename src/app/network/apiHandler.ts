@@ -1,4 +1,4 @@
-import { MapInfo } from '@/data/MapInfo'
+import { MapInfo } from '@/data/mapInfo'
 import { apiClient } from '@/network/apiClient'
 
 export const apiHandler = async <T extends | MapInfo | Blob>(

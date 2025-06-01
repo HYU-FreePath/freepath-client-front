@@ -16,8 +16,8 @@ import { amenities } from '@/data/amenities'
 import { specials } from '@/data/specials'
 //import { pos, parking, ramp } from './positions.json'
 
-import { MapInfoAPI } from '@/network/MapInfoAPI'
-import { MapInfo } from '@/data/MapInfo'
+import { MapInfoAPI } from '@/network/mapInfoAPI'
+import { MapInfo } from '@/data/mapInfo'
 
 const CItemWrapper = styled.div`
   ${tw`flex justify-center items-center`}
@@ -39,7 +39,7 @@ function App() {
     // 쿼리 키는 고유한 식별자로, 쿼리를 구분하는 데 사용.
     queryKey: ['mapInfo', uuid],
     // API 호출 함수
-    queryFn: () => MapInfoAPI(uuid || ''),
+    queryFn: () => MapInfoAPI(uuid ?? ''),
     // 캐시된 데이터가 5분 동안 유효하도록 설정
     staleTime: 5 * 60 * 1000,
   })
@@ -98,11 +98,16 @@ function App() {
       installAboutElement.classList.add('invisible')
     }
   }
+ 
+  //const mapObj = mapInfo.data?.[0]
+  //const pos: amenities[]    = mapObj?.data.pos     ?? []
+  //const ramp: specials[]    = mapObj?.data.ramp    ?? []
+  //const parking: specials[] = mapObj?.data.parking ?? []
 
   const pos: amenities[] = mapInfo.data?.data.pos ?? []
   const ramp: specials[] = mapInfo.data?.data.ramp ?? []
   const parking: specials[] = mapInfo.data?.data.parking ?? []
-
+  
   const toggleSearch = () => {
     setSearchVisible(!isSearchVisible)
   }
