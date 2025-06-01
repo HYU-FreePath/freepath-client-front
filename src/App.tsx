@@ -219,6 +219,7 @@ function App() {
     }
   }, [mapLevel])
 
+  /** 
   useEffect(() => {
     kakao.maps.load(() => {
       const tileset = new kakao.maps.Tileset({
@@ -246,6 +247,7 @@ function App() {
       kakao.maps.Tileset.add('ROADMAP', tileset)
     })
   }, [])
+  */
 
   // **6. mapInfo 데이터가 도착하면 state 업데이트**
   useLayoutEffect(() => {
