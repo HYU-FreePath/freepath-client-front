@@ -16,7 +16,7 @@ import { amenities } from '@/data/amenities'
 import { specials } from '@/data/specials'
 //import { pos, parking, ramp } from './positions.json'
 
-import { MapInfoAPI } from '@/network/mapInfoAPI'
+import { MapInfoAPI } from './app/network/mapInfoAPI'
 import { MapInfo } from '@/data/mapInfo'
 
 const CItemWrapper = styled.div`
@@ -107,7 +107,7 @@ function App() {
   const pos: amenities[] = mapInfo.data?.data.pos ?? []
   const ramp: specials[] = mapInfo.data?.data.ramp ?? []
   const parking: specials[] = mapInfo.data?.data.parking ?? []
-  
+
   const toggleSearch = () => {
     setSearchVisible(!isSearchVisible)
   }
