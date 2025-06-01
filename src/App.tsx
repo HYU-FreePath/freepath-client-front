@@ -16,7 +16,7 @@ import { amenities } from '@/data/amenities'
 import { specials } from '@/data/specials'
 //import { pos, parking, ramp } from './positions.json'
 
-import { mapInfoAPI } from '@/network/mapInfoAPI'
+import { mapInfoAPI } from './app/network/mapInfoAPI'
 import { mapInfo } from '@/data/mapInfo'
 
 const CItemWrapper = styled.div`
