@@ -1,7 +1,7 @@
 import { amenities } from '@/data/amenities'
 import { specials } from '@/data/specials'
 
-export type MapInfo = {
+export type mapInfo = {
   statusCode: number
   message: string
   data: {
