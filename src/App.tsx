@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, SetStateAction, useRef } from 'react'
+import { useState, useEffect, SetStateAction, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
@@ -44,6 +44,7 @@ function App() {
     staleTime: 5 * 60 * 1000,
   })
 
+  const [isValid, setIsValid] = useState<boolean>(true) // uuid 유효성 검사
   const mapRef = useRef<kakao.maps.Map>(null)
   const refInput = useRef<HTMLInputElement>(null)
   const [isVisibleId, setIsVisibleId] = useState<number | null>(null) // Popup ID
@@ -254,27 +255,28 @@ function App() {
   }, [])
   */
 
-  // **6. mapInfo 데이터가 도착하면 state 업데이트**
-  useLayoutEffect(() => {
-    if (mapData?.data) {
-      const meta = mapData.data?.data.meta
-      const latNum = parseFloat(meta.lat)
-      const lngNum = parseFloat(meta.lng)
-      setCenterLat(latNum)
-      setCenterLng(lngNum)
-      /** 
-      setState(prev => ({
-        ...prev,
-        center: { lat: centerLat, lng: centerLng },
-        isLoading: false,
-      }));*/
-      setMapState(prev => ({
-        ...prev,
-        center: { lat: centerLat, lng: centerLng },
-        isPanto: false,
-      }));
+  // mapData 상태 변화에 따라 isValid와 좌표를 업데이트
+  useEffect(() => {
+    if (mapData.isLoading) {
+      return
     }
-  }, [centerLat, centerLng, mapData.data])
+    if (mapData.isError) {
+      setIsValid(false)
+      return
+    }
+    if (mapData.data?.statusCode !== 200) {
+      setIsValid(false)
+      return
+    }
+    // statusCode === 200
+    const meta = mapData.data.data.meta
+    const latNum = parseFloat(meta.lat)
+    const lngNum = parseFloat(meta.lng)
+    setCenterLat(latNum)
+    setCenterLng(lngNum)
+    setMapState({ center: { lat: latNum, lng: lngNum }, isPanto: false })
+    setIsValid(true)
+  }, [mapData.isLoading, mapData.isError, mapData.data])
 
   useEffect(() => {
     // 스크린 리더가 카카오 로고 및 스케일 요소 읽지 않도록 설정
@@ -406,6 +408,22 @@ function App() {
           </>
         }
       </MapMarker>
+    )
+  }
+
+  if (mapData.isLoading) {
+    return (
+      <div className='w-full h-screen-vh flex justify-center items-center'>
+        <h1 className='text-2xl font-fBold'>로딩 중...</h1>
+      </div>
+    )
+  }
+
+  if (!isValid) {
+    return (
+      <div className='w-full h-screen-vh flex justify-center items-center'>
+        <h1 className='text-2xl font-fBold'>잘못된 접근입니다.</h1>
+      </div>
     )
   }
 
