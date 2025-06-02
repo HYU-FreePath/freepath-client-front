@@ -39,14 +39,16 @@
         content: textValue
       }
 
+      let result: IssueResponse | null = null
+
       try {
         // code가 undefined일 수 있으니, 예외 처리 추가해도 좋습니다.
         if (!code) {
           throw new Error('유효한 코드가 지정되지 않았습니다.')
         }
 
-        const result: IssueResponse = await sendReportAPI(code, payload)
-        setSuccessMsg(`이슈 생성 성공: ${result.statusCode}`)
+        result = await sendReportAPI(code, payload)
+        setSuccessMsg(`접수 성공 : ${result.statusCode}`)
       } catch (err: unknown) {
         // 1) AxiosError인지 검사
         if (axios.isAxiosError(err)) {
@@ -76,7 +78,7 @@
       } finally {
         setLoading(false)
         // 성공 여부와 관계없이 닫기 알림
-        if (successMsg) {
+        if (result && result.statusCode === 200) {
           alert('불편한 점이 접수되었습니다.')
         }
         onClose()
