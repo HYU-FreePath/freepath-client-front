@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import 'regenerator-runtime/runtime'
 import App from './App.tsx'
 import TopPage from './TopPage.tsx'
+import AdminPage from './AdminPage.tsx'
 import './index.css'
 
 const FloorPlan = lazy(() => import('@/components/FloorPlans'))
@@ -23,6 +24,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               </Suspense>
             }
           />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
