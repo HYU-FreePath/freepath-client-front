@@ -5,7 +5,7 @@ export interface IssuePayload {
 }
 
 export interface IssueResponse {
-  statusCode: boolean
+  statusCode: number
   message: string
   data: Array<string>
   // 필요에 따라 필드 추가
