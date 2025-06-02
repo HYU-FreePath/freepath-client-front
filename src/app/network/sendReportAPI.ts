@@ -12,7 +12,7 @@ export interface IssueResponse {
 }
 
 export const sendReportAPI = async (
-  code: string,
+  code: string | undefined,
   payload: IssuePayload
 ): Promise<IssueResponse> => {
   return apiHandler<IssueResponse>('POST', `/issues/${code}`, payload)

@@ -33,12 +33,12 @@ function FloorPlans() {
 
     useEffect(() => {
         const loadImage = async () => {
-            const imagePath = `/api/images/${id}/${floor}.png`
+            const imagePath = `/images/${id}/${floor}.png`
             setIsImageLoaded(false) // 로딩 상태로 전환
             setIsLoadError(false) // 에러 상태 해제
 
             try {
-                const blob = await apiHandler<Blob>(imagePath, 'blob')
+                const blob = await apiHandler<Blob>("GET", imagePath, 'blob')
                 const imageUrl = URL.createObjectURL(blob)
                 setImageSrc(imageUrl)
                 setIsImageLoaded(true)
