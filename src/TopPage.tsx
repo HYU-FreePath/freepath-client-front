@@ -1,17 +1,16 @@
 // src/app/pages/TopPage.tsx
-import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { mapListInfo } from '@/data/mapList'
+import type { mapListInfo, datas } from '@/data/mapList'
 import { mapListAPI } from '@/network/mapListAPI'
 
 export default function TopPage() {
-  // mapListInfo가 배열 형태(mapListInfo[])로 반환된다고 가정
+  // 1) useQuery의 제네릭 타입을 mapListInfo로 변경
   const {
-    data: mapList = [],
+    data: mapList,    // mapList는 mapListInfo 또는 undefined
     isLoading,
     isError,
     error,
-  } = useQuery<mapListInfo[], Error>({
+  } = useQuery<mapListInfo, Error>({
     queryKey: ['mapInfoList'],
     queryFn: () => mapListAPI(),
     staleTime: 5 * 60 * 1000,
@@ -36,10 +35,11 @@ export default function TopPage() {
             에러 발생: {error.message}
           </p>
         ) : (
-          /* 지도 리스트를 보여주는 그리드 */
+          /* mapList.data는 이제 datas[] */
           <div className="grid gap-4">
-            {mapList.data?.filter((item) => item.status === 'DEPLOYING')
-              .map((item : mapListInfo) => (
+            {mapList?.data
+              .filter((item: datas) => item.status === 'DEPLOYING')
+              .map((item: datas) => (
                 <a
                   key={item.mapId}
                   href={item.frontUrl || '#'}
