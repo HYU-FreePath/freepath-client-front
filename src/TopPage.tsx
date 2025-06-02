@@ -38,12 +38,11 @@ export default function TopPage() {
         ) : (
           /* 지도 리스트를 보여주는 그리드 */
           <div className="grid gap-4">
-            {mapList
-              .filter((item) => item.status === 'DEPLOYING')
-              .map((item) => (
+            {mapList.data?.filter((item) => item.status === 'DEPLOYING')
+              .map((item : mapListInfo) => (
                 <a
-                  key={item.id}
-                  href={item.url || '#'}
+                  key={item.mapId}
+                  href={item.frontUrl || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="
@@ -59,8 +58,11 @@ export default function TopPage() {
                   "
                 >
                   <span className="text-xl font-semibold text-gray-800">
-                    {item.title}
+                    {item.name}
                   </span>
+                  <p className="text-gray-600 mt-2">
+                    {item.description || '설명이 없습니다.'}
+                  </p>
                 </a>
               ))}
           </div>
