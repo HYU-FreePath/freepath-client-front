@@ -533,6 +533,7 @@ function App() {
               targetName={targetAlertName}
               setInputValue={setInputValue}
               setShowResults={setShowResults}
+              code={uuid}
             />
           )}
           

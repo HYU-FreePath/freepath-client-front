@@ -1,15 +1,61 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useSpeechToText } from "./useSpeechToText"
+import { sendReportAPI, IssuePayload, IssueResponse } from '@/network/sendReportAPI'
 
 interface InfoAlertProps {
   targetName: string
   onClose: () => void
   setInputValue: (value: string) => void
   setShowResults: (value: boolean) => void
+  code: string | undefined
 }
 
-const InfoAlert: React.FC<InfoAlertProps> = ({ targetName, onClose, setInputValue, setShowResults }) => {
+const InfoAlert: React.FC<InfoAlertProps> = ({ targetName, onClose, setInputValue, setShowResults, code }) => {
   const { transcript, listening, toggleListening, abortListening, browserSupportsSpeechRecognition } = useSpeechToText()
+
+  const [textValue, setTextValue] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setTextValue(e.target.value)
+  }
+
+  // 3. 버튼 클릭 시 실행될 함수
+  const handleSubmit = async () => {
+    // 빈 문자열이면 요청하지 않도록 막기
+    if (!textValue.trim()) {
+      setError('내용을 입력해주세요.')
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    setSuccessMsg(null)
+
+    const payload: IssuePayload = {
+      content: textValue
+    }
+
+    try {
+      // 4. POST 요청: /api/issues/{code}
+      const result: IssueResponse = await sendReportAPI(code, payload)
+      setSuccessMsg(`이슈 생성 성공: ${result.statusCode}`)
+    } catch (err) {
+      // axios 에러 객체가 올 경우 err.response 존재
+      if (err.response) {
+        setError(`서버 에러: ${err.response.status} - ${JSON.stringify(err.response.data)}`)
+      } else {
+        setError(`네트워크 에러: ${err.message}`)
+      }
+      alert(error)
+    } finally {
+      setLoading(false)
+      alert('불편한 점이 접수되었습니다.')
+      onClose()
+    }
+  }
 
   const handleCloseButton = () => {
     abortListening()
@@ -26,11 +72,6 @@ const InfoAlert: React.FC<InfoAlertProps> = ({ targetName, onClose, setInputValu
       onClose()
     }
     toggleListening()
-  }
-
-  const handleSendButton = () => {
-    alert('불편한 점이 접수되었습니다.')
-    onClose()
   }
 
   return (
@@ -155,9 +196,16 @@ const InfoAlert: React.FC<InfoAlertProps> = ({ targetName, onClose, setInputValu
                 (예시: '길이 너무 좁아요', '정보가 잘못되었어요.')
               </p>
               <textarea
-                className='w-full h-20 p-2 border border-gray-300 rounded-md'
-                placeholder='불편한 점을 적어주세요...'
-              ></textarea>
+                id="issue-textarea"
+                value={textValue}
+                onChange={handleChange}
+                rows={6}
+                placeholder="여기에 내용을 입력하세요."
+                className="w-full p-2 border rounded focus:outline-none focus:ring"
+              />
+
+              {error && <p className="text-red-500 mt-2">{error}</p>}
+              {successMsg && <p className="text-green-500 mt-2">{successMsg}</p>}
             </>
           )
         }
@@ -169,11 +217,15 @@ const InfoAlert: React.FC<InfoAlertProps> = ({ targetName, onClose, setInputValu
               <div className="mt-4 flex justify-end">
                 {
                   targetName === 'report' ? (
-                    <button 
-                      className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
-                      onClick={handleSendButton}
+                    <button
+                      onClick={handleSubmit}
+                      disabled={loading}
+                      className={`
+                        px-4 py-2 rounded-md mr-2
+                        ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700 text-white'}
+                      `}
                     >
-                      보내기
+                      {loading ? '전송 중...' : '보내기'}
                     </button>
                   ) : null
                 }

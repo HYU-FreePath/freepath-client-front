@@ -1,11 +1,24 @@
-import { mapInfo } from '@/data/mapInfo'
+// src/network/apiHandler.ts
 import { apiClient } from '@/network/apiClient'
+import type { AxiosRequestConfig } from 'axios'
 
-export const apiHandler = async <T extends | mapInfo | Blob>(
-    urlPath: string,
-    responseType: 'json' | 'blob' = 'json' // 기본값을 json으로 설정
+type ResponseTypeOption = 'json' | 'blob'
+
+export const apiHandler = async <T>(
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  urlPath: string,
+  payload?: unknown,
+  responseType: ResponseTypeOption = 'json'
 ): Promise<T> => {
-    return apiClient.get(urlPath, { responseType }).then((response) => {
-        return response.data as T
-    })
+  const config: AxiosRequestConfig = { responseType }
+  switch (method) {
+    case 'GET':
+      return apiClient.get<T>(urlPath, config).then(res => res.data as T)
+    case 'POST':
+      return apiClient.post<T>(urlPath, payload, config).then(res => res.data as T)
+    case 'PUT':
+      return apiClient.put<T>(urlPath, payload, config).then(res => res.data as T)
+    case 'DELETE':
+      return apiClient.delete<T>(urlPath, config).then(res => res.data as T)
+  }
 }
