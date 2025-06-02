@@ -20,12 +20,21 @@ export default function TopPage() {
     <div className="font-Ptd min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-blue-500 to-teal-400 p-6">
       <div className="w-full max-w-lg bg-white bg-opacity-70 backdrop-filter backdrop-blur-lg rounded-3xl p-10 shadow-2xl">
         {/* 타이틀 */}
-        <h1 className="text-5xl font-extrabold text-gray-900 mb-2 text-center">
-          FreePath
-        </h1>
-        <p className="text-gray-700 text-center mb-8">
-          배리어프리맵 서비스 플랫폼
-        </p>
+        <div className='flex justify-center items-center mb-10'>
+          <img
+            src='/images/logo.png'
+            className='w-20 mr-3'
+            alt='FreePath Logo'
+          />
+          <div className='flex flex-col justify-center'>
+            <h1 className="text-4xl font-extrabold text-gray-900 mb-2 text-left">
+              FreePath
+            </h1>
+            <p className="text-gray-700 text-left">
+              배리어프리맵 서비스 플랫폼
+            </p>
+          </div>
+        </div>
 
         {/* 로딩 / 에러 처리 */}
         {isLoading ? (
@@ -48,7 +57,7 @@ export default function TopPage() {
                   className="
                     block 
                     px-6 py-4 
-                    bg-white 
+                    bg-slate-100
                     rounded-xl 
                     shadow 
                     hover:shadow-xl 
@@ -65,6 +74,13 @@ export default function TopPage() {
                   </p>
                 </a>
               ))}
+              {
+                mapList?.data.length === 0 && (
+                  <p className="text-center text-gray-700">
+                    현재 서비스 중인 지도가 없습니다.
+                  </p>
+                )
+              }
           </div>
         )}
       </div>
