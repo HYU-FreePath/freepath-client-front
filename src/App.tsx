@@ -663,11 +663,11 @@ function App() {
                           className="p-2 text-sm w-[11rem] h-[5rem] text-center"
                         >
                           {/* 팝업 내부 원하는 내용 */}
-                          <p className='text-[0.83rem]'>[건물 진입 경사로]</p>
+                          <p className='font-fBold text-[0.83rem] text-blue-900'>[건물 진입 경사로]</p>
                           <p className='text-[0.83rem]'>{value.memo}</p>
                           <button
                             onClick={() => setIsVisibleId(null)}
-                            className="mt-2 text-xs text-blue-500"
+                            className="font-fBold mt-2 text-xs w-full text-blue-500"
                           >
                             닫기
                           </button>
