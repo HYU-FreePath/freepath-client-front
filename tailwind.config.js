@@ -12,6 +12,8 @@ module.exports = {
         none: 'none',
       },
       screens: {
+        hm: { max: '400px' },
+        hsm: { max: '360px' },
         pwa: { raw: '(display-mode: standalone)' },
       },
     },

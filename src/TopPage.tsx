@@ -6,7 +6,7 @@ import { mapListAPI } from '@/network/mapListAPI'
 export default function TopPage() {
   // 1) useQuery의 제네릭 타입을 mapListInfo로 변경
   const {
-    data: mapList,    // mapList는 mapListInfo 또는 undefined
+    mapList,    // mapList는 mapListInfo 또는 undefined
     isLoading,
     isError,
     error,
@@ -23,14 +23,14 @@ export default function TopPage() {
         <div className='flex justify-center items-center mb-10'>
           <img
             src='/images/logo.png'
-            className='w-20 mr-3'
+            className='w-20 mr-3 hm:w-16'
             alt='FreePath Logo'
           />
-          <div className='flex flex-col justify-center'>
-            <h1 className="text-4xl font-extrabold text-gray-900 mb-2 text-left">
+          <div className='flex flex-col justify-center w-full'>
+            <h1 className="text-4xl font-extrabold text-gray-900 mb-2 text-left hm:text-3xl">
               FreePath
             </h1>
-            <p className="text-gray-700 text-left">
+            <p className="text-gray-700 text-left hm:text-sm hsm:text-xs">
               배리어프리맵 서비스 플랫폼
             </p>
           </div>
