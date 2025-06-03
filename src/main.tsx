@@ -17,6 +17,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<TopPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="/:uuid" element={<App />} />
           <Route path="/:uuid/floorplan/:id" element={
               <Suspense fallback={<div>Loading...</div>}>
@@ -24,7 +25,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               </Suspense>
             }
           />
-          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
