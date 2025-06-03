@@ -37,26 +37,6 @@ function FloorPlans() {
     const [imageSize, setImageSize] = useState({ width: '100%', height: '100vh' })
     const [floor, setFloor] = useState('1F')
     const [imageSrc, setImageSrc] = useState('')
-    
-    const isStateValid = Boolean(
-        id &&
-        state &&
-        state.title &&
-        Array.isArray(state.floors) &&
-        state.floors.length > 0
-    )
-
-    useEffect(() => {
-        if (!isStateValid) {
-            if (window.history.state && window.history.length > 1) {
-                navigate(-1)
-            } else if (uuid) {
-                navigate(`/${uuid}`, { replace: true })
-            } else {
-                navigate('/', { replace: true })
-            }
-        }
-    }, [isStateValid, navigate, uuid])
 
     useEffect(() => {
         if (floors.length > 0) {
