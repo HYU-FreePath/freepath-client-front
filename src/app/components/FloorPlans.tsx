@@ -37,17 +37,26 @@ function FloorPlans() {
     const [imageSize, setImageSize] = useState({ width: '100%', height: '100vh' })
     const [floor, setFloor] = useState('1F')
     const [imageSrc, setImageSrc] = useState('')
+    
+    const isStateValid = Boolean(
+        id &&
+        state &&
+        state.title &&
+        Array.isArray(state.floors) &&
+        state.floors.length > 0
+    )
 
     useEffect(() => {
-        if (!id || !state || !state.title || !state.floors) {
-            // 히스토리가 있으면 뒤로 가고, 없으면 루트로 이동
+        if (!isStateValid) {
             if (window.history.state && window.history.length > 1) {
                 navigate(-1)
-            } else {
+            } else if (uuid) {
                 navigate(`/${uuid}`, { replace: true })
+            } else {
+                navigate('/', { replace: true })
             }
         }
-    }, [state, navigate, uuid, id])
+    }, [isStateValid, navigate, uuid])
 
     useEffect(() => {
         if (floors.length > 0) {
