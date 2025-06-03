@@ -155,11 +155,9 @@ const InfoAlert: React.FC<InfoAlertProps> = ({ pos, targetName, onClose, setInpu
             <>
               <p className='mb-4'>
                 Powered by FreePath
-                <br />
-                - 2025 소프트웨어융합대학 캡스톤디자인 -
               </p>
-
-              <p>[개발진]</p>
+              <p>2025 한양대학교 ERICA<br/>소프트웨어융합대학 캡스톤디자인</p>
+              <br/>
               <p>Frontend: 이재형 (컴퓨터학부 21)</p>
               <p>Backend: 정윤성 (컴퓨터학부 20)</p>
 
