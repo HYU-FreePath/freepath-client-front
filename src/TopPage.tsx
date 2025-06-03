@@ -6,7 +6,7 @@ import { mapListAPI } from '@/network/mapListAPI'
 export default function TopPage() {
   // 1) useQuery의 제네릭 타입을 mapListInfo로 변경
   const {
-    mapList,    // mapList는 mapListInfo 또는 undefined
+    data : mapList,    // mapList는 mapListInfo 또는 undefined
     isLoading,
     isError,
     error,
