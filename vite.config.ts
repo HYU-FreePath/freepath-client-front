@@ -32,9 +32,9 @@ export default defineConfig({
 
       // PWA Settings
       manifest: {
-        name: '길편하냥',
-        short_name: '길편하냥',
-        description: '한양대학교 ERICA캠퍼스 배리어프리맵',
+        name: 'FreePath',
+        short_name: 'FreePath',
+        description: '배리어프리맵 플랫폼',
         theme_color: '#ffffff',
         icons: [
           {
