@@ -1,9 +1,10 @@
-  import React, { useState } from 'react'
+  import React, { useEffect, useState } from 'react'
   import axios from 'axios'
   import { useSpeechToText } from "./useSpeechToText"
   import { sendReportAPI, IssuePayload, IssueResponse } from '@/network/sendReportAPI'
 
   interface InfoAlertProps {
+    pos: Array<amenities> | undefined
     targetName: string
     onClose: () => void
     setInputValue: (value: string) => void
@@ -11,9 +12,10 @@
     code: string | undefined
   }
 
-  const InfoAlert: React.FC<InfoAlertProps> = ({ targetName, onClose, setInputValue, setShowResults, code }) => {
+  const InfoAlert: React.FC<InfoAlertProps> = ({ pos, targetName, onClose, setInputValue, setShowResults, code }) => {
     const { transcript, listening, toggleListening, abortListening, browserSupportsSpeechRecognition } = useSpeechToText()
 
+    const [lastWord, setLastWord] = useState<string>('')
     const [textValue, setTextValue] = useState<string>('')
     const [loading, setLoading] = useState<boolean>(false)
     const [error, setError] = useState<string | null>(null)
@@ -92,15 +94,32 @@
 
     const handleButton = () => {
       if (listening) {
-        const value = transcript.replace(/(\s*)/g, "")
-        if (value !== '') {
-          setInputValue(value)
+        //const value = transcript.replace(/(\s*)/g, "")
+        if (lastWord !== '') {
+          setInputValue(lastWord)
           setShowResults(true)
         }
         onClose()
       }
       toggleListening()
     }
+
+    useEffect(() => {
+      if (listening && transcript) {
+        // transcript에서 공백 기준으로 맨 마지막 단어만 추출
+        // 방법1: 정규식으로 마지막 공백 이전의 모든 문자(.*\s+)를 제거
+        setLastWord(transcript.replace(/.*\s+/, ''))
+
+        const filteredPos = pos.filter((item: amenities) => item.title.includes(lastWord))
+        if (lastWord.length > 1 && filteredPos.length > 0) {
+          setInputValue(lastWord)
+          setShowResults(true)
+          onClose()
+          toggleListening()
+        }
+      }
+    }, [listening, transcript, setInputValue, setShowResults, lastWord, pos, onClose, toggleListening])
+
 
     return (
       <div
@@ -185,7 +204,7 @@
                 />
                 <p className='text-center py-5'>
                   {browserSupportsSpeechRecognition === true ? 
-                    (listening ? transcript : '음성 인식을 시작하세요.') 
+                    (listening ? lastWord : '음성 인식을 시작하세요.') 
                     : '지원하지 않는 브라우저입니다.'}
                 </p>
               </>

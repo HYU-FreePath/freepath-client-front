@@ -31,11 +31,11 @@ const Searching: React.FC<SearchingProps> = (
 
     return (
         <>
-            {value &&
+            {value.length > 1 &&
                 <ul id='searchedList' className='w-full mt-3'>
                     {pos && (() => {
                         const filteredPos = pos.filter((item: amenities) => item.title.includes(value))
-
+                        
                         // 검색 결과가 1개일 때 자동으로 선택
                         if (filteredPos.length === 1) {
                             const {id, lat, lng} = filteredPos[0]
