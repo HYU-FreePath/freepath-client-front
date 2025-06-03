@@ -26,7 +26,7 @@ export default function TopPage() {
             className='w-20 mr-3 hm:w-16'
             alt='FreePath Logo'
           />
-          <div className='flex flex-col justify-center w-full'>
+          <div className='flex flex-col justify-center '>
             <h1 className="text-4xl font-extrabold text-gray-900 mb-2 text-left hm:text-3xl">
               FreePath
             </h1>
