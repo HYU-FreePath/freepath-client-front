@@ -1,10 +1,11 @@
 // src/app/pages/TopPage.tsx
-import { useQuery } from '@tanstack/react-query'
-import type { mapListInfo, datas } from '@/data/mapList'
-import { mapListAPI } from '@/network/mapListAPI'
+//import { useQuery } from '@tanstack/react-query'
+//import type { mapListInfo, datas } from '@/data/mapList'
+//import { mapListAPI } from '@/network/mapListAPI'
 
 export default function TopPage() {
   // 1) useQuery의 제네릭 타입을 mapListInfo로 변경
+  /**
   const {
     data : mapList,    // mapList는 mapListInfo 또는 undefined
     isLoading,
@@ -14,7 +15,7 @@ export default function TopPage() {
     queryKey: ['mapInfoList'],
     queryFn: () => mapListAPI(),
     staleTime: 5 * 60 * 1000,
-  })
+  }) */
 
   return (
     <div className="font-Ptd min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-blue-500 to-teal-400 p-6">
@@ -36,15 +37,73 @@ export default function TopPage() {
           </div>
         </div>
 
-        {/* 로딩 / 에러 처리 */}
-        {isLoading ? (
+
+        <span className="text-lg font-semibold text-gray-800 block mb-4">
+          현재 서비스 중인 지도
+        </span>
+
+        <div className="grid gap-4">
+          <a
+            key='hyue'
+            href='https://hyu.ac/bfmap'
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+              block 
+              px-6 py-4 
+              bg-slate-100
+              rounded-xl 
+              shadow 
+              hover:shadow-xl 
+              transform hover:-translate-y-1 
+              transition 
+              hover:bg-gray-50
+            "
+          >
+            <span className="text-xl font-semibold text-gray-800">
+              한양대 ERICA 길편하냥
+            </span>
+            <p className="text-gray-600 mt-2">
+              한양대학교 ERICA 공식 배리어프리맵 서비스
+            </p>
+          </a>
+
+          <a
+            key='hyue'
+            href='/hyu-erica-bfmap'
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+              block 
+              px-6 py-4 
+              bg-slate-100
+              rounded-xl 
+              shadow 
+              hover:shadow-xl 
+              transform hover:-translate-y-1 
+              transition 
+              hover:bg-gray-50
+            "
+          >
+            <span className="text-xl font-semibold text-gray-800">
+              한양대 ERICA 배리어프리맵
+            </span>
+            <p className="text-gray-600 mt-2">
+              FreePath 플랫폼이 연동된 테스트 서비스입니다.
+            </p>
+          </a>
+        </div>
+
+        {/*
+        // 로딩 / 에러 처리
+        isLoading ? (
           <p className="text-center text-gray-500">로딩 중...</p>
         ) : isError ? (
           <p className="text-center text-red-500">
             에러 발생: {error.message}
           </p>
         ) : (
-          /* mapList.data는 이제 datas[] */
+          // mapList.data는 이제 datas[]
           <div className="grid gap-4">
             {mapList?.data
               .filter((item: datas) => item.status === 'DEPLOYING')
@@ -74,15 +133,14 @@ export default function TopPage() {
                   </p>
                 </a>
               ))}
-              {
-                mapList?.data.length === 0 && (
-                  <p className="text-center text-gray-700">
-                    현재 서비스 중인 지도가 없습니다.
-                  </p>
-                )
-              }
+            {mapList?.data.length === 0 && (
+              <p className="text-center text-gray-700">
+                현재 서비스 중인 지도가 없습니다.
+              </p>
+            )}
           </div>
-        )}
+        )
+      */}
       </div>
     </div>
   )
