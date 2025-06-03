@@ -6,6 +6,12 @@ import { apiHandler } from '@/network/apiHandler'
 import tw from 'twin.macro'
 import styled from 'styled-components'
 
+import { floors } from '@/data/floors'
+interface FloorPlansState {
+  title: string
+  floors: Array<floors>
+}
+
 const CategoryItem = styled.button<{ isActive: boolean }>(({ isActive }) => [
     tw`flex-col bg-white py-1 px-3 mr-2 mb-2 border border-gray-300 shadow-sm rounded-2xl cursor-pointer 
         focus:outline-none transition-all duration-100 text-[0.9rem] justify-center items-center`,
@@ -20,9 +26,10 @@ function FloorPlans() {
     const location = useLocation()
     const navigate = useNavigate()
 
-    const { id } = useParams()
-    const title = location.state?.title
-    const floors = location.state?.floors || []
+    const { uuid, id } = useParams()
+    const state = location.state as FloorPlansState
+    const title = state?.title
+    const floors = state?.floors
 
     const [isImageLoaded, setIsImageLoaded] = useState(false)
     const [isLoadError, setIsLoadError] = useState(false)
@@ -32,13 +39,36 @@ function FloorPlans() {
     const [imageSrc, setImageSrc] = useState('')
 
     useEffect(() => {
+        if (!id || !state || !state.title || !state.floors) {
+            // 히스토리가 있으면 뒤로 가고, 없으면 루트로 이동
+            if (window.history.state && window.history.length > 1) {
+                navigate(-1)
+            } else {
+                navigate(`/${uuid}`, { replace: true })
+            }
+        }
+    }, [state, navigate, uuid, id])
+
+    useEffect(() => {
+        if (floors.length > 0) {
+            setFloor(floors[0].floorLabel) // 초기 플로어 설정
+        } else {
+            console.error('floors 배열이 비어 있습니다.')
+            setIsLoadError(true) // 에러 상태로 전환
+            setIsImageLoaded(false) // 이미지 로딩 실패 상태로 전환
+        }
+    }, [floors])
+
+    useEffect(() => {
         const loadImage = async () => {
-            const imagePath = `/images/${id}/${floor}.png`
+            const selectedFloorObj = floors.find(elem => elem.floorLabel === floor)
+            const imagePath = selectedFloorObj?.planImageUrl ?? null
+            //const imagePath = floors[0].planImageUrl ?? null
             setIsImageLoaded(false) // 로딩 상태로 전환
             setIsLoadError(false) // 에러 상태 해제
 
             try {
-                const blob = await apiHandler<Blob>("GET", imagePath, 'blob')
+                const blob = await apiHandler<Blob>("GET", imagePath!, undefined, 'blob')
                 const imageUrl = URL.createObjectURL(blob)
                 setImageSrc(imageUrl)
                 setIsImageLoaded(true)
@@ -104,7 +134,7 @@ function FloorPlans() {
         if (window.history.state && window.history.length > 1) {
             navigate(-1)
         } else {
-            navigate('/', { replace: true })
+            navigate(`/${uuid}`, { replace: true })
         }
     }
 
@@ -166,14 +196,14 @@ function FloorPlans() {
             </header>
             <div className='absolute top-[60px] left-[13px] overflow-hidden z-[2] font-fMedium'>
                 {
-                    floors.map((floorName : string) => (
+                    floors.map((fr) => (
                         <CategoryItem
-                            key={floorName}
-                            onClick={() => handleFloorButton(floorName)}
-                            isActive={floor === floorName}
+                            key={fr.floorLabel}
+                            onClick={() => handleFloorButton(fr.floorLabel)}
+                            isActive={floor === fr.floorLabel}
                         >
                             <CItemWrapper>
-                                {floorName}
+                                {fr.floorLabel}
                             </CItemWrapper>
                         </CategoryItem>
                     ))
